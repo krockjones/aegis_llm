@@ -1,0 +1,61 @@
+# Ollama + AegisLLM Guard on one Docker network.
+# Usage: docker compose up --build
+# Optional Open WebUI (Tier C): docker compose --profile tier-c up --build
+#
+# Host browser: http://localhost:8765  (Guard) — upstream is http://ollama:11434 inside the stack.
+# Pull models inside the ollama container, e.g.:
+#   docker compose exec ollama ollama pull llama3.2
+#   docker compose exec ollama ollama pull nomic-embed-text
+#
+# macOS / Windows: host.docker.internal is not required for ollama↔guard (same compose network).
+# Linux: same; both services use the bridge network below.
+
+services:
+  ollama:
+    # Pinned release (not :latest) for reproducible pulls; bump when you need newer Ollama.
+    # To track latest instead: image: ollama/ollama:latest
+    image: ollama/ollama:0.18.3
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+
+  aegis-llm:
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      AEGISLLM_LISTEN_HOST: "0.0.0.0"
+      AEGISLLM_LISTEN_PORT: "8765"
+      AEGISLLM_UPSTREAM_BASE_URL: "http://ollama:11434"
+    depends_on:
+      - ollama
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import os,urllib.request; urllib.request.urlopen('http://127.0.0.1:' + os.environ.get('AEGISLLM_LISTEN_PORT', '8765') + '/healthz')",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  # Tier C (opt-in): Open WebUI in front of Guard. Does not start with plain `docker compose up`.
+  # Run: `docker compose --profile tier-c up -d` then Tier C Playwright tests against http://localhost:3000 .
+  open-webui:
+    profiles: ["tier-c"]
+    image: ghcr.io/open-webui/open-webui:v0.5.7
+    ports:
+      - "3000:8080"
+    environment:
+      OPENAI_API_BASE_URL: "http://aegis-llm:8765/v1"
+      OPENAI_API_KEY: "na"
+      WEBUI_SECRET_KEY: "tier-c-change-me-in-real-deployments"
+    depends_on:
+      - aegis-llm
+
+volumes:
+  ollama_data: {}

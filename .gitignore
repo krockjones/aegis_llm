@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.eggs/
+dist/
+build/
+.DS_Store
+**/.DS_Store
+__MACOSX/
+Archive.zip

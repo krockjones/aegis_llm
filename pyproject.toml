@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aegis-llm"
+version = "0.2.0"
+description = "AegisLLM Guard — OpenAI-compatible edge proxy for local LLM backends (Ollama first)"
+readme = "README.md"
+license = {text = "Proprietary"}
+authors = [
+    {name = "Aegis Research Team"},
+]
+keywords = [
+    "llm",
+    "ollama",
+    "openai",
+    "proxy",
+    "local-ai",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "httpx>=0.27.0",
+    "pyyaml>=6.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+    "respx>=0.21.0",
+    "asgi-lifespan>=2.1.0",
+]
+# Tier C: browser E2E against Open WebUI (`tests/e2e_open_webui/`). Install browsers: `python -m playwright install` (headless shell required for chromium.launch(headless=True)).
+e2e = [
+    "pytest>=7.4.0",
+    "playwright>=1.42.0",
+]
+
+[project.scripts]
+aegis-llm = "aegis_llm.main:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["aegis_llm*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = [
+    "integration: requires live Ollama or external services (set AEGISLLM_LIVE_OLLAMA=1); skip in default CI",
+    "scenario: optional product-scenario label for traceability (see build_log/SCENARIO_COVERAGE.md)",
+    "open_webui_e2e: Tier C Playwright tests against Open WebUI (set AEGISLLM_OPEN_WEBUI_E2E=1; pip install -e '.[e2e]' and python -m playwright install)",
+]
