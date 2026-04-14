@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aegis-llm"
 version = "0.2.0"
-description = "AegisLLM Guard — OpenAI-compatible edge proxy for local LLM backends (Ollama first)"
+description = "AegisLLM Guard — narrow OpenAI-shaped HTTP gateway in front of Ollama (alpha; bounded API)"
 readme = "README.md"
 license = {text = "Proprietary"}
 authors = [

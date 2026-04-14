@@ -52,7 +52,9 @@ services:
       - "3000:8080"
     environment:
       OPENAI_API_BASE_URL: "http://aegis-llm:8765/v1"
+      # Placeholder only (Open WebUI expects a value); not a real API key.
       OPENAI_API_KEY: "na"
+      # Tier-C dev default only — override for any non-local deployment.
       WEBUI_SECRET_KEY: "tier-c-change-me-in-real-deployments"
     depends_on:
       - aegis-llm

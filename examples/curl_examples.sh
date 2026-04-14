@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 # Examples: AegisLLM Guard on http://127.0.0.1:8765 with Ollama behind it.
+# Requires: jq on PATH; Guard must be reachable at BASE (default 127.0.0.1:8765).
 set -euo pipefail
+if ! command -v jq >/dev/null 2>&1; then
+  echo "error: jq is required (e.g. brew install jq, apt install jq)" >&2
+  exit 1
+fi
 BASE="${AEGISLLM_EXAMPLE_BASE:-http://127.0.0.1:8765}"
 
 curl -sS "${BASE}/healthz" | jq .
