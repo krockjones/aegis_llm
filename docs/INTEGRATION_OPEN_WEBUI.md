@@ -1,6 +1,8 @@
 # Open WebUI + AegisLLM Guard
 
-Manual checklist for **Open WebUI** (or similar OpenAI-compatible UIs) in front of **Guard** with **Ollama** upstream. Use this after `aegis-llm` is listening and Ollama is running with at least one chat and (for RAG) one embedding model pulled.
+**Doc role:** real-client connection settings, UI/streaming checklists, and Open WebUI quirks—not the product wedge (see [README.md](../README.md)) or the HTTP contract (see [API_CONTRACT.md](./API_CONTRACT.md)).
+
+Manual checklist for **Open WebUI** (or similar OpenAI-shaped UIs) in front of **Guard** with **Ollama** upstream. Use this after Guard is listening and Ollama is running with at least one chat and (for RAG) one embedding model pulled.
 
 ## Prerequisites
 

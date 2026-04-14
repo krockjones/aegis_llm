@@ -2,6 +2,8 @@
 
 Step-by-step from **nothing running** to **first successful chat** through Guard. After this, point any **OpenAI-compatible** client at Guard’s base URL (see [INTEGRATION_OPEN_WEBUI.md](./INTEGRATION_OPEN_WEBUI.md) for Open WebUI).
 
+**Canonical first run:** use **Path A (Docker Compose)** below unless you already run Ollama on the host and prefer a local Python venv—the [README](../README.md) quickstart points here for Path A.
+
 **Time:** about 10–20 minutes, mostly model download on first run.
 
 ---
@@ -16,7 +18,8 @@ Step-by-step from **nothing running** to **first successful chat** through Guard
 
 ## Prerequisites
 
-- **Docker** and **Docker Compose** (recommended path below), *or* Python **3.10+** and a running **Ollama** on your machine.
+- **Path A:** **Docker** and **Docker Compose** (see below).
+- **Path B (alternative):** Python **3.10+** and **`ollama serve`** on the same machine.
 - **Optional:** `curl` and `jq` for copy-paste checks (`jq` is optional if you read raw JSON).
 
 Working directory for commands is the **repository root** (the folder that contains `docker-compose.yml` and `pyproject.toml`).
@@ -25,7 +28,7 @@ Working directory for commands is the **repository root** (the folder that conta
 
 ## Path A — Docker Compose (recommended first run)
 
-Brings up **Ollama + Guard** on one network. Good for a clean trial and for feedback without touching system Python.
+Brings up **Ollama + Guard** on one network. This is the **primary** quickstart path for new users (matches the [README](../README.md) canonical quickstart).
 
 ### 1. Start the stack
 
@@ -100,9 +103,9 @@ Uses `http://127.0.0.1:8765` by default; override with `AEGISLLM_EXAMPLE_BASE=..
 
 ---
 
-## Path B — Local Python + Ollama already on the host
+## Path B — Local Python + Ollama already on the host (alternative)
 
-Use this when you already run **`ollama serve`** on the machine (default **`http://127.0.0.1:11434`**).
+Use **Path B** when you already run **`ollama serve`** on the machine (default **`http://127.0.0.1:11434`**) and want Guard in a **venv** without Compose—not the default first-run path.
 
 ### 1. Install Guard (editable, dev extras)
 

@@ -2,6 +2,8 @@
 
 This document complements the README **Security / deployment** table and [API_CONTRACT.md](./API_CONTRACT.md). It lists **risks** from default and common configurations, **mitigations**, and what Guard emits at startup.
 
+**Warnings vs enforcement:** startup **`level=WARNING`** logs and this doc describe **truth about posture**; they do **not** replace firewalls, reverse proxies, or your own access controls. Only configuration and HTTP behavior (e.g. which routes require Bearer tokens) are enforced in code.
+
 ---
 
 ## Trust boundaries
