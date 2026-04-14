@@ -200,7 +200,7 @@ To include **integration** live tests (still excluding Tier C browser tests):
 pytest tests/ -q -m "not open_webui_e2e"
 ```
 
-**Live checks** (real Ollama and optionally a running Guard process): set **`AEGISLLM_LIVE_OLLAMA=1`**, then run `pytest tests/ -m "not open_webui_e2e"` including **`tests/test_integration_live.py`**. Optional env: **`AEGISLLM_GUARD_BASE_URL`** (default `http://127.0.0.1:8765`), **`AEGISLLM_UPSTREAM_BASE_URL`** for direct Ollama probes (default `http://127.0.0.1:11434`). Use **`Authorization: Bearer …`** when Guard is configured with **`AEGISLLM_API_KEYS`** (see each test’s docstring).
+**Live checks** (real Ollama and optionally a running Guard process): set **`AEGISLLM_LIVE_OLLAMA=1`**, then run `pytest tests/ -m "not open_webui_e2e"` including **`tests/test_integration_live.py`**. Optional env: **`AEGISLLM_GUARD_BASE_URL`** (default `http://127.0.0.1:8765`), **`AEGISLLM_UPSTREAM_BASE_URL`** for direct Ollama probes (default `http://127.0.0.1:11434`), **`AEGISLLM_LIVE_BEARER`** (Bearer token when Guard uses **`AEGISLLM_API_KEYS`**), **`AEGISLLM_LIVE_EMBED_MODEL`** for live embeddings (default `nomic-embed-text`). See each live test’s docstring.
 
 **Tier C (Open WebUI + Playwright):** `docker compose --profile tier-c up`, then `pip install -e ".[e2e]"`, `python -m playwright install`, `AEGISLLM_OPEN_WEBUI_E2E=1 pytest tests/e2e_open_webui/ -q`. Details: [`tests/e2e_open_webui/README.md`](tests/e2e_open_webui/README.md).
 
