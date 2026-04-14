@@ -232,4 +232,6 @@ GitHub Actions (see [`.github/workflows/aegis-llm.yml`](.github/workflows/aegis-
 
 ## License
 
-Proprietary (Aegis Research Team). Redistribution and commercial terms are governed outside this README; the **product** positioning above is intentionally narrow—see [Alpha release scope](#alpha-release-scope).
+Licensed under the **Apache License 2.0**. See the [`LICENSE`](LICENSE) file in the repository root for the full text and copyright notice.
+
+The **product** positioning above (alpha, bounded API, Ollama-first) is intentionally narrow—see [Alpha release scope](#alpha-release-scope).

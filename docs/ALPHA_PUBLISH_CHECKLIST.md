@@ -18,7 +18,7 @@ Use this before tagging or announcing a **public alpha**. Check boxes as you com
 
 - [ ] **Doc roles:** README = wedge + fastest path; GETTING_STARTED = setup; API_CONTRACT = surface; SECURITY_POSTURE = deployment truth; INTEGRATION_OPEN_WEBUI = client notes — no duplicate “what is Guard” essays.
 - [ ] **Community one-liner** in README still accurate after edits.
-- [ ] **Metadata:** [pyproject.toml](../pyproject.toml) license/description; [.gitignore](../.gitignore); no committed secrets; internal links work.
+- [ ] **Metadata:** [pyproject.toml](../pyproject.toml) license/description (Apache-2.0 + [LICENSE](../LICENSE)); [.gitignore](../.gitignore); no committed secrets; internal links work.
 - [ ] **Tests section** in README states what default pytest does **and does not** prove.
 - [ ] **Security wording:** README + [SECURITY_POSTURE.md](./SECURITY_POSTURE.md) agree on public routes, keys, CORS, warnings vs enforcement.
 

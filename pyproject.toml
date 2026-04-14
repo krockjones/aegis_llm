@@ -7,7 +7,7 @@ name = "aegis-llm"
 version = "0.2.0"
 description = "AegisLLM Guard — narrow OpenAI-shaped HTTP gateway in front of Ollama (alpha; bounded API)"
 readme = "README.md"
-license = {text = "Proprietary"}
+license = {text = "Apache-2.0"}
 authors = [
     {name = "Aegis Research Team"},
 ]
@@ -19,6 +19,7 @@ keywords = [
     "local-ai",
 ]
 classifiers = [
+    "License :: OSI Approved :: Apache Software License",
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
