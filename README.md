@@ -1,79 +1,76 @@
 # AegisLLM Guard
 
-**What this is (v0.2):** an **OpenAI-compatible reliability gateway for Ollama**—a thin layer clients talk to as if it were an OpenAI HTTP API, while **Ollama stays the engine** you already run. It is not a universal local LLM platform, not a full OpenAI API mirror, and **production is Ollama-only** (an internal `Backend` protocol exists for structure and tests, not for “pick another vendor” today).
+**Release status:** Public **alpha** (package v0.2). The HTTP surface and defaults may evolve between releases; treat **[docs/API_CONTRACT.md](docs/API_CONTRACT.md)** and **`tests/`** as the integration source of truth—not every OpenAI client feature is supported or guaranteed.
 
-It adds predictable **timeouts**, **health/readiness** (`/healthz`, `/readyz`), optional **API keys**, **request IDs**, **typed request validation** for the implemented subset, **consistent error shapes**, **structured access logs**, and **`/v1/embeddings`** (mapped to Ollama **`POST /api/embed`**) so chat UIs and RAG stacks **fail fast with clear errors** instead of hanging on a stuck upstream.
+> **One-liner:** AegisLLM Guard is a **narrow public alpha**: an OpenAI-**shaped** HTTP edge in front of **Ollama** with an **explicitly bounded** API, clearer errors, and operator-focused posture—not a full OpenAI mirror, not a multi-backend platform.
 
-### What problem it addresses
+## What this is
+
+A thin **OpenAI-compatible reliability gateway**: HTTP clients speak a familiar **`/v1/...`** surface while **Ollama stays the engine** you already run. **Only Ollama is implemented and supported as an upstream today.** An internal `Backend` protocol exists for structure and tests, not for “pick another vendor” in this release line.
+
+## Where it sits
+
+In front of **one** Ollama HTTP API at **`AEGISLLM_UPSTREAM_BASE_URL`**. Guard does not pull or host models by itself.
+
+## What problem it solves
 
 - **Hung or vague failures** when Open WebUI, SDKs, or agents call Ollama over raw HTTP and the upstream misbehaves or disappears mid-request.
 - **“OpenAI-compatible” confusion** where clients assume fields or semantics you do not actually support—Guard documents a **bounded** subset in the contract and validates requests accordingly.
-- **Operator blind spots:** readiness vs liveness split, startup warnings for risky bind/auth combinations, and logs you can grep without spelunking Ollama internals.
+- **Operator blind spots:** readiness vs liveness split, startup signals for risky bind/auth combinations, and logs you can grep without spelunking Ollama internals.
 
-### Why it is an easy adoption choice
+## What it is not
 
-- **No model migration:** you keep the same Ollama models and pulls; Guard only changes **where clients point** (`http://<guard>:8765` with `/v1/...` paths).
-- **Small surface:** one process (or one container next to Ollama in Compose), env-driven config, **Docker Compose** path from zero to first chat in minutes—see **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)**.
-- **Honest boundaries:** if something is unsupported, the goal is a **predictable** `4xx` / error payload, not silent weirdness—see the contract below.
+- **Not** a universal local-LLM **platform** or “any backend” gateway.
+- **Not** a full OpenAI API mirror or drop-in parity with every SDK feature.
+- **Not yet:** multi-backend routing, quotas, tool calling, `encoding_format: base64` for embeddings, or broad compatibility with every OpenAI client feature—see **What it is not yet** under [Alpha release scope](#alpha-release-scope).
 
-**What it is not yet:** multi-backend routing, quotas, tool calling, `encoding_format: base64` for embeddings, or broad drop-in compatibility with every OpenAI client feature.
+**Canonical API boundaries** (supported subset, rejected vs ignored fields, errors): [docs/API_CONTRACT.md](docs/API_CONTRACT.md). OpenAPI at **`/docs`** is descriptive; the contract doc is what integrators should rely on.
 
-**Canonical API boundaries (supported subset, rejected vs ignored fields, errors):** [docs/API_CONTRACT.md](docs/API_CONTRACT.md). OpenAPI at `/docs` is descriptive; the contract doc is the integration source of truth.
+---
 
-### Quick start (step by step)
+## Canonical quickstart (recommended)
 
-**[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** — Docker Compose or local Python, pull a model, verify health/models, first `curl` chat, optional stream, then link out to Open WebUI / SDK notes.
+**Fastest path for a stranger:** Docker Compose (Ollama + Guard on one network). Full step-by-step (start stack, pull a model, `curl` health / readyz / models / first chat, optional stream) lives in **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** under **Path A — Docker Compose (recommended first run)**.
 
-## Ollama compatibility
+Minimal recap from the **repository root** (where `docker-compose.yml` lives):
 
-Embeddings require a current Ollama build that implements **`POST /api/embed`** (see [Ollama API — Generate Embeddings](https://github.com/ollama/ollama/blob/main/docs/api.md)). Smoke-tested behavior is expected on **Ollama release-line images** (e.g. `ollama/ollama:latest` at compose time); pin versions in production if you need reproducibility.
+1. `docker compose up --build` (add `-d` for detached).
+2. In another terminal: `docker compose exec ollama ollama pull llama3.2` (or another tag; use the same name in chat JSON).
+3. `curl -sS http://127.0.0.1:8765/healthz` and `http://127.0.0.1:8765/readyz`.
+4. First non-stream chat: copy the `curl` from Path A **step 4** in GETTING_STARTED.
 
-## Product charter (optional upstream monorepo)
+Then: optional stream (Path A step 5), **[examples/curl_examples.sh](examples/curl_examples.sh)**, and **[docs/INTEGRATION_OPEN_WEBUI.md](docs/INTEGRATION_OPEN_WEBUI.md)** if you use Open WebUI.
 
-Some teams keep Guard inside a larger **Aegis** repository; product charter or wedge docs may live under that repo’s `docs/product/` (not shipped in this standalone tree).
+---
+
+## Alpha release scope
+
+Use this section to set expectations—**trust-preserving**, not defensive.
+
+| Topic | Reality in this alpha |
+|--------|------------------------|
+| **Upstream** | **Ollama-only** at a single configured base URL. No multi-vendor routing. |
+| **API** | **Bounded** OpenAI-**shaped** subset—see [docs/API_CONTRACT.md](docs/API_CONTRACT.md). |
+| **What runs in CI** | Default: `pytest … -m "not integration and not open_webui_e2e"` (mocked upstream). Plus Docker **compose smoke**—see [Tests](#tests). |
+| **Live / browser** | Opt-in: `AEGISLLM_LIVE_OLLAMA=1` and **`tests/test_integration_live.py`**; Tier C Playwright under **`tests/e2e_open_webui/`** (not default CI). |
+| **Known limits** | Same as **What it is not** and the **Out of scope** section in [docs/API_CONTRACT.md](docs/API_CONTRACT.md). |
+| **Not a platform** | No quotas, billing, LiteLLM-style provider matrix, or enterprise control plane. |
 
 **This repository** is the integration source of truth: **README**, **[docs/API_CONTRACT.md](docs/API_CONTRACT.md)**, **[docs/SECURITY_POSTURE.md](docs/SECURITY_POSTURE.md)**, and OpenAPI at **`/docs`**.
 
-## Requirements
+Before a public alpha tag or announcement, use **[docs/ALPHA_PUBLISH_CHECKLIST.md](docs/ALPHA_PUBLISH_CHECKLIST.md)** (maintainer gate + go/hold criteria).
 
-- Python 3.10+
-- A running [Ollama](https://ollama.com/) server (default `http://127.0.0.1:11434`)
+### Product charter (optional upstream monorepo)
 
-## Install (development)
+Some teams keep Guard inside a larger **Aegis** repository; wedge docs may live under that repo’s `docs/product/` (not shipped here).
 
-From the **clone root** of this repository (the directory that contains `pyproject.toml`):
+---
 
-```bash
-python3 -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -e ".[dev]"
-```
+## Ollama compatibility
 
-If Guard is **vendored inside a larger monorepo**, `cd` into this package directory (the folder that contains this `README.md`) first, then run the same commands.
+Embeddings require a current Ollama build that implements **`POST /api/embed`** (see [Ollama API — Generate Embeddings](https://github.com/ollama/ollama/blob/main/docs/api.md)). Smoke-tested behavior is expected on **Ollama release-line images** (e.g. `ollama/ollama:latest` at compose time); **pin image tags** if you need reproducibility.
 
-## Run
-
-From the same directory:
-
-```bash
-AEGISLLM_LISTEN_HOST=127.0.0.1 AEGISLLM_LISTEN_PORT=8765 aegis-llm
-```
-
-Or without activating the venv:
-
-```bash
-AEGISLLM_LISTEN_HOST=127.0.0.1 AEGISLLM_LISTEN_PORT=8765 .venv/bin/aegis-llm
-```
-
-On startup you should see a **structured diagnostics line** (backend, bind URL, upstream, auth, timeouts) and then Uvicorn’s banner. If the bind is **not loopback-only** (`127.0.0.1` / `::1`) and **`AEGISLLM_API_KEYS` is empty**, startup emits a structured **`level=WARNING`** log about **unauthenticated `/v1/*`**. A separate **`level=WARNING`** may log **permissive CORS** for non-loopback binds (even when keys are set). Suppress these by raising `AEGISLLM_LOG_LEVEL` above WARNING, or fix posture—see **[docs/SECURITY_POSTURE.md](docs/SECURITY_POSTURE.md)** and **Security / deployment** below.
-
-**Note:** `cd foo && pip install …` only runs `pip` if `cd` succeeds.
-
-### Uvicorn directly
-
-```bash
-uvicorn aegis_llm.app:create_app --factory --host 127.0.0.1 --port 8765
-```
+---
 
 ## Environment variables
 
@@ -108,9 +105,11 @@ timeouts:
   read: 300.0
 ```
 
+---
+
 ## Security / deployment
 
-Typical bind/auth posture (see [docs/API_CONTRACT.md](docs/API_CONTRACT.md) and **[docs/SECURITY_POSTURE.md](docs/SECURITY_POSTURE.md)** for risks, mitigations, and startup logs):
+Typical bind/auth posture (see [docs/API_CONTRACT.md](docs/API_CONTRACT.md) and **[docs/SECURITY_POSTURE.md](docs/SECURITY_POSTURE.md)** for risks, mitigations, and startup logs). **Startup WARNING lines are operator signals** (logging), not automatic lockdown—see SECURITY_POSTURE for what they do and do not enforce.
 
 | Deployment profile | Typical `AEGISLLM_LISTEN_HOST` | API keys | CORS (today) | Public routes | Non-loopback + posture |
 |--------------------|-------------------------------|----------|--------------|---------------|-------------------------|
@@ -126,15 +125,62 @@ Typical bind/auth posture (see [docs/API_CONTRACT.md](docs/API_CONTRACT.md) and 
 
 - **Upstream disclosure:** `GET /v1/models` may include the response header `X-AegisLLM-Upstream-Base`, echoing the configured upstream base URL. Any client that can call this endpoint can observe that value; strip or block the header at a proxy if disclosure is undesirable.
 
+---
+
+## Alternatives to Docker Compose
+
+Use these when Compose is not your primary path.
+
+### Local Python + Ollama on the host (Path B)
+
+Requires **Python 3.10+** and **`ollama serve`** (default upstream `http://127.0.0.1:11434`). Install, run, and the same `curl` checks as Path A: **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)** — section **Path B — Local Python … (alternative)**.
+
+### Run the `aegis-llm` CLI (after editable install)
+
+From the clone root, after `pip install -e ".[dev]"` (or `pip install -e .`):
+
+```bash
+AEGISLLM_LISTEN_HOST=127.0.0.1 AEGISLLM_LISTEN_PORT=8765 aegis-llm
+```
+
+Or: `AEGISLLM_LISTEN_HOST=127.0.0.1 AEGISLLM_LISTEN_PORT=8765 .venv/bin/aegis-llm`
+
+On startup you should see a **structured diagnostics line** (backend, bind URL, upstream, auth, timeouts) and then Uvicorn’s banner. If the bind is **not loopback-only** (`127.0.0.1` / `::1`) and **`AEGISLLM_API_KEYS` is empty**, startup emits a structured **`level=WARNING`** log about **unauthenticated `/v1/*`**. A separate **`level=WARNING`** may log **permissive CORS** for non-loopback binds (even when keys are set). Suppress these by raising `AEGISLLM_LOG_LEVEL` above WARNING, or fix posture—see **[docs/SECURITY_POSTURE.md](docs/SECURITY_POSTURE.md)**.
+
+**Note:** `cd foo && pip install …` only runs `pip` if `cd` succeeds.
+
+### Uvicorn directly
+
+```bash
+uvicorn aegis_llm.app:create_app --factory --host 127.0.0.1 --port 8765
+```
+
+### Docker (Guard container only)
+
+```bash
+docker build -t aegis-llm:local .
+docker run --rm -p 8765:8765 \
+  -e AEGISLLM_UPSTREAM_BASE_URL=http://host.docker.internal:11434 \
+  aegis-llm:local
+```
+
+(`AEGISLLM_OLLAMA_BASE_URL` still works as a legacy alias.)
+
+---
+
 ## OpenAPI / live schema
 
 `GET /docs` and `/openapi.json` reflect current Pydantic models and routes. For **what is supported vs ignored vs rejected**, stream semantics, and operator-oriented error categories, use **[docs/API_CONTRACT.md](docs/API_CONTRACT.md)**.
+
+---
 
 ## Point clients at Guard
 
 After **[docs/GETTING_STARTED.md](docs/GETTING_STARTED.md)**, point tools at Guard using each client’s OpenAI-compatible base URL (often **`http://127.0.0.1:8765/v1`** for SDKs, or **origin only** for some UIs that append `/v1` themselves—see integration doc).
 
-- **Open WebUI:** checklist and streaming verification in [docs/INTEGRATION_OPEN_WEBUI.md](docs/INTEGRATION_OPEN_WEBUI.md).
+- **Open WebUI:** [docs/INTEGRATION_OPEN_WEBUI.md](docs/INTEGRATION_OPEN_WEBUI.md).
+
+---
 
 ## curl examples
 
@@ -152,6 +198,8 @@ AEGISLLM_EXAMPLE_EMBED_MODEL=nomic-embed-text \
 bash examples/curl_examples.sh
 ```
 
+---
+
 ## Endpoints
 
 - `GET /healthz` — process up
@@ -160,58 +208,28 @@ bash examples/curl_examples.sh
 - `POST /v1/chat/completions` — chat (stream + non-stream)
 - `POST /v1/embeddings` — embeddings (Ollama `/api/embed`)
 
-## Docker (Guard only)
-
-```bash
-docker build -t aegis-llm:local .
-docker run --rm -p 8765:8765 \
-  -e AEGISLLM_UPSTREAM_BASE_URL=http://host.docker.internal:11434 \
-  aegis-llm:local
-```
-
-(`AEGISLLM_OLLAMA_BASE_URL` still works as a legacy alias.)
-
-## Docker Compose (Ollama + Guard)
-
-From the repository root:
-
-```bash
-docker compose up --build
-```
-
-Guard on **localhost:8765**, Ollama on **localhost:11434**. Pull models inside the stack, e.g.:
-
-```bash
-docker compose exec ollama ollama pull llama3.2
-docker compose exec ollama ollama pull nomic-embed-text
-```
+---
 
 ## Tests
 
-Default (mocked upstream, no Docker, same filter as PR CI):
+- **Default (CI + local gate):** mocked upstream, no Docker, no live Ollama, no Tier C browser tests—the same filter GitHub Actions uses:
 
-```bash
-pytest tests/ -q -m "not integration and not open_webui_e2e"
-```
+  ```bash
+  pytest tests/ -q -m "not integration and not open_webui_e2e"
+  ```
 
-To include **integration** live tests (still excluding Tier C browser tests):
+  **Passing** here means the **bounded** contract in [docs/API_CONTRACT.md](docs/API_CONTRACT.md) matches the implementation for the routes under test—it does **not** mean every OpenAI client or feature works.
 
-```bash
-pytest tests/ -q -m "not open_webui_e2e"
-```
+- **Integration (opt-in):** set **`AEGISLLM_LIVE_OLLAMA=1`** and run `pytest tests/ -q -m "not open_webui_e2e"` to include **`tests/test_integration_live.py`** (real Ollama and/or Guard). Optional env: **`AEGISLLM_GUARD_BASE_URL`**, **`AEGISLLM_UPSTREAM_BASE_URL`**, **`AEGISLLM_LIVE_BEARER`**, **`AEGISLLM_LIVE_EMBED_MODEL`**—see each test’s docstring.
 
-**Live checks** (real Ollama and optionally a running Guard process): set **`AEGISLLM_LIVE_OLLAMA=1`**, then run `pytest tests/ -m "not open_webui_e2e"` including **`tests/test_integration_live.py`**. Optional env: **`AEGISLLM_GUARD_BASE_URL`** (default `http://127.0.0.1:8765`), **`AEGISLLM_UPSTREAM_BASE_URL`** for direct Ollama probes (default `http://127.0.0.1:11434`), **`AEGISLLM_LIVE_BEARER`** (Bearer token when Guard uses **`AEGISLLM_API_KEYS`**), **`AEGISLLM_LIVE_EMBED_MODEL`** for live embeddings (default `nomic-embed-text`). See each live test’s docstring.
+- **Tier C (optional):** Open WebUI + Playwright: `docker compose --profile tier-c up`, then `pip install -e ".[e2e]"`, `python -m playwright install`, `AEGISLLM_OPEN_WEBUI_E2E=1 pytest tests/e2e_open_webui/ -q`. Details: [`tests/e2e_open_webui/README.md`](tests/e2e_open_webui/README.md).
 
-**Tier C (Open WebUI + Playwright):** `docker compose --profile tier-c up`, then `pip install -e ".[e2e]"`, `python -m playwright install`, `AEGISLLM_OPEN_WEBUI_E2E=1 pytest tests/e2e_open_webui/ -q`. Details: [`tests/e2e_open_webui/README.md`](tests/e2e_open_webui/README.md).
+- **Compose smoke:** `bash scripts/smoke_compose.sh` (Docker; exercises `docker-compose.yml`).
 
-**Compose smoke** (builds and exercises the stack from `docker-compose.yml`):
+GitHub Actions (see [`.github/workflows/aegis-llm.yml`](.github/workflows/aegis-llm.yml)) runs the **default pytest** command on **Python 3.10 / 3.12 / 3.13** and a **`compose-smoke`** job.
 
-```bash
-bash scripts/smoke_compose.sh
-```
-
-GitHub Actions (see [`.github/workflows/aegis-llm.yml`](.github/workflows/aegis-llm.yml)) runs **`pytest -m "not integration and not open_webui_e2e"`** on **Python 3.10 / 3.12 / 3.13** and a **`compose-smoke`** job that executes **`scripts/smoke_compose.sh`** (Docker required).
+---
 
 ## License
 
-Proprietary (Aegis Research Team). Enterprise use and redistribution are governed separately from this README.
+Proprietary (Aegis Research Team). Redistribution and commercial terms are governed outside this README; the **product** positioning above is intentionally narrow—see [Alpha release scope](#alpha-release-scope).
