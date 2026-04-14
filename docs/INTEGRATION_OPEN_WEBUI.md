@@ -29,7 +29,7 @@ Open WebUI often points at Guard’s **origin only** (no `/v1` suffix) because t
 
 ## Streaming verification (Iteration 3)
 
-This section is the **manual** streaming pass for the **§1.2 client cap** (Open WebUI + one official SDK). A client counts as **validated** only after every **§1** row is satisfied with evidence and **§1.1** provenance is filled. **Open WebUI UI + wire:** prefer **Tier C Playwright** (`tests/e2e_open_webui/`, marker `open_webui_e2e`) for repeatable browser and Network-tab–class assertions (e.g. streaming `POST` + `text/event-stream` + `[DONE]`); use this checklist for gaps Playwright does not cover yet (failure toasts, buffering quirks). **SDK:** **scripted Tier B** runs (real Guard + Ollama, see `build_log/TESTING_NOTES.md`) may satisfy **wire-level** §1 rows for the **SDK** (or documented automation) if you record job/env provenance alongside results. **Tier A** `pytest` mocks alone do not count as §1 validation.
+This section is the **manual** streaming pass for the **§1.2 client cap** (Open WebUI + one official SDK). A client counts as **validated** only after every **§1** row is satisfied with evidence and **§1.1** provenance is filled. **Open WebUI UI + wire:** prefer **Tier C Playwright** (`tests/e2e_open_webui/`, marker `open_webui_e2e`) for repeatable browser and Network-tab–class assertions (e.g. streaming `POST` + `text/event-stream` + `[DONE]`); use this checklist for gaps Playwright does not cover yet (failure toasts, buffering quirks). **SDK:** **scripted** runs against real Guard + Ollama (see **`tests/test_integration_live.py`** with `AEGISLLM_LIVE_OLLAMA=1`) may satisfy **wire-level** §1 rows for the **SDK** (or documented automation) if you record job/env provenance alongside results. **Tier A** `pytest` mocks alone do not count as §1 validation.
 
 **Status (agent / CI environment):** No automated §1 validation runs in CI. **Operator (2026-04-11):** Open WebUI **shell** confirmed running (see **Operator attestation** below). **§1 checkboxes** remain **unchecked** until streaming scenarios are executed and wire/UI evidence is recorded in this doc.
 
@@ -47,7 +47,7 @@ Recorded for **sub-plan 03A** coordinator sign-off of “stack reachable / UI us
 
 ### Normative criteria (§1) — checklist header
 
-The §1 criteria in the table below mirror `build_log/PLAN_ITERATION_03.md` §1: if wording changes, update **both** documents, or treat the **plan** as canonical and refresh this table from it.
+The §1 criteria in the table below are normative for this checklist. If server-side streaming semantics change, align this table with **`docs/API_CONTRACT.md`** (streaming / SSE) and the implementation in **`aegis_llm/`**.
 
 A pass is **validated** for that client only if **all** rows were observed and recorded (checkboxes OK):
 
@@ -78,7 +78,7 @@ Run against a running Guard + Ollama with the same **Connection settings** as ab
 2. **Failure during stream** — Provoke upstream failure or stop Ollama mid-reply where safe (e.g. stop `ollama serve` or use a model/load scenario that errors). Record **what the UI showed** vs **what appeared on the wire** (browser devtools → Network → the chat completion request: `text/event-stream` lines, error `data:` payloads, trailing `[DONE]` per `sse_error_termination` where applicable).
 3. **Quirks** — Note Open WebUI–specific issues: base URL with or without `/v1`, model list refresh, timeouts, any UI that buffers the entire stream until the end (affects **Incrementality** observation).
 
-Delegated steps and copy-paste prompts live in **`build_log/PLAN_ITERATION_03A_SUBAGENT_BRIEFS.md`** (roles **03A-O1** … **03A-O4**).
+Record wire notes and quirks in the **Wire notes** and **Quirks observed** paste blocks below (operator or automation).
 
 #### Wire notes — stream on / stream off (subagent / operator paste)
 
@@ -101,7 +101,7 @@ Open WebUI normative §1 rows still require browser Network evidence; this block
 _Role **03A-O2**._
 
 ```text
-Blocked in automated wave (2026-04-13): failure scenario requires operator-controlled Open WebUI + Network capture while upstream stops mid-stream (see build_log/PLAN_ITERATION_03A_SUBAGENT_BRIEFS.md role 03A-O2). No §1 Failure tick.
+Blocked in automated wave (2026-04-13): failure scenario requires operator-controlled Open WebUI + Network capture while upstream stops mid-stream. No §1 Failure tick.
 ```
 
 #### Quirks observed (subagent / operator paste)
@@ -133,7 +133,7 @@ _Use for bullets not captured above (role **03A-O1** may fold short quirks into 
 
 ### Explicit deferral — OpenAI Python SDK (Iteration 3)
 
-The hands-on OpenAI Python SDK `stream=True` §1 execution in this section is **deferred** so operator time can prioritize Open WebUI browser wire evidence and UI-visible streaming behavior under Iteration 3’s capped-client scope. Per **§1.2** of the parent plan, that choice is acceptable when the reason and unblock path are explicit rather than omitted. **Unblocking** the SDK leg means running the `pip install` and Python example below once Guard and Ollama are in a stable configuration, observing Start through Failure against the §1 table, then recording results in the SDK §1 checkboxes and **§1.1** using `pip show openai`, the active Python version, and date or Guard context. For complementary **wire-level** automation (httpx consumer, not the official SDK), you may use Tier B `tests/test_integration_live.py::test_live_guard_chat_completion_stream` with environment flags and provenance conventions described in `build_log/TESTING_NOTES.md`; that test does not by itself satisfy SDK-specific checklist rows unless you also capture SDK-side observations. The Open WebUI §1 block earlier in this document can be completed **independently** of the SDK pass. Until the deferred run happens, the SDK rows below stay open and this doc does **not** claim §1 validation for the Python client.
+The hands-on OpenAI Python SDK `stream=True` §1 execution in this section is **deferred** so operator time can prioritize Open WebUI browser wire evidence and UI-visible streaming behavior under Iteration 3’s capped-client scope. Per **§1.2** of the parent plan, that choice is acceptable when the reason and unblock path are explicit rather than omitted. **Unblocking** the SDK leg means running the `pip install` and Python example below once Guard and Ollama are in a stable configuration, observing Start through Failure against the §1 table, then recording results in the SDK §1 checkboxes and **§1.1** using `pip show openai`, the active Python version, and date or Guard context. For complementary **wire-level** automation (httpx consumer, not the official SDK), you may use `tests/test_integration_live.py::test_live_guard_chat_completion_stream` with `AEGISLLM_LIVE_OLLAMA=1` and the env vars documented in that test’s docstring; that test does not by itself satisfy SDK-specific checklist rows unless you also capture SDK-side observations. The Open WebUI §1 block earlier in this document can be completed **independently** of the SDK pass. Until the deferred run happens, the SDK rows below stay open and this doc does **not** claim §1 validation for the Python client.
 
 Minimal pattern: point the official client at Guard’s OpenAI-compatible root and align the API key with `AEGISLLM_API_KEYS` (use a placeholder or empty string when Guard has no keys).
 

@@ -4,7 +4,7 @@
 
 **Browser-driven** checks against **Open WebUI** in front of **AegisLLM Guard** with **Ollama** upstream. Tier C validates UI-level behavior that Tier A mocks and Tier B HTTP checks do not cover alone.
 
-See the testing tier hub: [`build_log/testing_tiers/LEAD_TIER_C.md`](../../build_log/testing_tiers/LEAD_TIER_C.md).
+See the repository [README.md](../../README.md) **Tests** section for how Tier C fits into the default CI filter and optional Playwright runs.
 
 ## What is implemented today
 

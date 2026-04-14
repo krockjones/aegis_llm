@@ -106,7 +106,7 @@ Ollama may still ignore or interpret options per its own rules; Guard forwards a
 
 #### Operational verification
 
-End-to-end streaming validation (§1-style checklist and §1.1 provenance) is **authoritative** in `docs/INTEGRATION_OPEN_WEBUI.md` under **Streaming verification (Iteration 3)**. **Automated Tier B** runs (real Guard + Ollama SSE; see `build_log/TESTING_NOTES.md`) may also be cited here with their own provenance (job, image pins, date). **Temporal status** for manual rows is recorded in the integration doc; readers must not infer manual UI status from this contract alone.
+End-to-end streaming validation (§1-style checklist and §1.1 provenance) is **authoritative** in `docs/INTEGRATION_OPEN_WEBUI.md` under **Streaming verification (Iteration 3)**. **Automated** real-stack SSE checks live in **`tests/test_integration_live.py`** (opt-in with `AEGISLLM_LIVE_OLLAMA=1`; see test docstrings for env vars and provenance). **Temporal status** for manual rows is recorded in the integration doc; readers must not infer manual UI status from this contract alone.
 
 #### Known limitations (streaming)
 

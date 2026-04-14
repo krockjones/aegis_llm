@@ -168,6 +168,6 @@ If you set **`AEGISLLM_API_KEYS`** (comma-separated), clients must send **`Autho
 ## Feedback and adoption
 
 - **Product / wedge framing:** may exist in a parent **Aegis** monorepo under `docs/product/`; not bundled here.
-- **Behavior truth:** [API_CONTRACT.md](./API_CONTRACT.md), [SECURITY_POSTURE.md](./SECURITY_POSTURE.md), and tests under `tests/` (see [build_log/SCENARIO_COVERAGE.md](../build_log/SCENARIO_COVERAGE.md)).
+- **Behavior truth:** [API_CONTRACT.md](./API_CONTRACT.md), [SECURITY_POSTURE.md](./SECURITY_POSTURE.md), and tests under `tests/`.
 
 If you are trying Guard for a real integration, note **what client you used**, **Guard + Ollama versions or image tags**, and **what broke or surprised you**—that is the highest-signal feedback at this stage.

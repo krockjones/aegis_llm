@@ -62,6 +62,6 @@ testpaths = ["tests"]
 pythonpath = ["."]
 markers = [
     "integration: requires live Ollama or external services (set AEGISLLM_LIVE_OLLAMA=1); skip in default CI",
-    "scenario: optional product-scenario label for traceability (see build_log/SCENARIO_COVERAGE.md)",
+    "scenario: optional product-scenario label for traceability (describe intent in test name or docstring)",
     "open_webui_e2e: Tier C Playwright tests against Open WebUI (set AEGISLLM_OPEN_WEBUI_E2E=1; pip install -e '.[e2e]' and python -m playwright install)",
 ]

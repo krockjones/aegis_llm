@@ -108,7 +108,7 @@ async def test_chat_completions_content_list_parts(client, ollama_base: str):
 async def test_chat_completions_stream(client, ollama_base: str):
     """Tier A (respx): upstream returns NDJSON chunks; Guard maps them to OpenAI-style SSE chunks and ends with ``[DONE]``.
 
-    See ``build_log/SCENARIO_COVERAGE.md`` (SSE / NDJSON streaming) for the operator-facing mapping.
+    See ``docs/API_CONTRACT.md`` (streaming / SSE) for the operator-facing contract.
     """
     lines = [
         '{"model":"m","message":{"role":"assistant","content":"he"},"done":false}',
