@@ -9,7 +9,7 @@ description = "AegisLLM Guard — narrow OpenAI-shaped HTTP gateway in front of 
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [
-    {name = "Aegis Research Team"},
+    {name = "AegisOneConnect, LLC"},
 ]
 keywords = [
     "llm",
