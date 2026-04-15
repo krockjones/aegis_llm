@@ -58,8 +58,6 @@ Use this section to set expectations—**trust-preserving**, not defensive.
 
 **This repository** is the integration source of truth: **README**, **[docs/API_CONTRACT.md](docs/API_CONTRACT.md)**, **[docs/SECURITY_POSTURE.md](docs/SECURITY_POSTURE.md)**, and OpenAPI at **`/docs`**.
 
-Before a public alpha tag or announcement, use **[docs/ALPHA_PUBLISH_CHECKLIST.md](docs/ALPHA_PUBLISH_CHECKLIST.md)** (maintainer gate + go/hold criteria).
-
 ### Product charter (optional upstream monorepo)
 
 Some teams keep Guard inside a larger **Aegis** repository; wedge docs may live under that repo’s `docs/product/` (not shipped here).
